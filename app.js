@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -25,18 +27,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/users', users);
 
-//-----------------------------Connection Between Unity Game Engine--------------------
+//-----------------------------Connection Between Unity & Graph Module--------------------
 var Socket = require('socket.io');
 var socketEvents = require('./socket.js');
 const server = app.listen(6110, function () {
     console.log("Unity Socket App on port 6110");
 });
+
 const io = new Socket(server);
-socketEvents(io);
-//-----------------------------Inter Connection Between Graph Module-------------------
 var net = require('net');
-var InterSocketEvents = require('./TCPSocket');
-InterSocketEvents(net);
+socketEvents(io, net);
+
+var spawn = require('child_process').spawn,
+    GraphSocket;
+GraphSocket = spawn('./_GraphModule');
+
 //=====================================================================================
 
 // catch 404 and forward to error handler

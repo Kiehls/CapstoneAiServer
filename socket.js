@@ -3,46 +3,63 @@
  */
 
 //io = server , socket = client(Android)
-module.exports = function (io) {
-    io.on('connection', function (socket) {
-        console.log('Socket initiated!');
+var _Socket_;
+var _EngineCount = 1;
+var _GraphCount = 0;
+// Start a Socket.IO Server
+module.exports = function (io, net, exec) {
 
-        //Android starts Game(First Connection).
-        io.emit('App start', 'Initialize Korean Chess Game');
-        //socket.emit('App start', 'Initialize Korean Chess Game');
+    //-----------------------------Inter Connection Between Graph Module-------------------
+    net.createServer(function (_socket) {
+        _Socket_ = _socket;
+        // Identify this client
+        _socket.name = _socket.remoteAddress + ":" + _socket.remotePort
 
-        //Android send request & server send response
-        socket.on('App request', function (pos) {
-            //console.log('Client Position: ', pos);
-            //console.log('Client Data Type: ', typeof (pos)) //-->String
+        // Send a nice welcome message and announce
+        //_Socket_.write("Welcome " + _socket.name + "\n", _socket);
+        process.stdout.write(_socket.name + " Graph Module Connected\n", _socket)
 
-            // //This part should be generate next state node
-            var next = JSON.parse(pos);
-            console.log("Received Before Position: " + next.B_Pos + "\n" +
-                "Received After Position: " + next.A_Pos);
-            console.log("Board Data: \n" + next.Board);
+        // Handle incoming messages from clients.
+        _Socket_.on('data', function (data) {
+            console.log('==========================Data From Graph==================================================');
+            process.stdout.write(_socket.name + "> " + data + ' | ' + _GraphCount + "\n", _socket);
+            _GraphCount++;
 
-            var B_Xpos = Math.floor(parseInt(next.B_Pos) / 10);
-            var B_Ypos = parseInt(next.B_Pos) % 10;
-            var A_Xpos = Math.floor(parseInt(next.A_Pos) / 10);
-            var A_Ypos = parseInt(next.A_Pos) % 10;
+            var nextJson = '7879';
 
-            console.log("B_xPos: " + B_Xpos + ", B_yPos: " + B_Ypos);
-            console.log("A_xPos: " + A_Xpos + ", A_yPos: " + A_Ypos);
-
-            var nextPos = {
-                "B_Pos": parseInt(next.B_Pos) + 1,
-                "A_Pos": parseInt(next.A_Pos) + 1,
-            };
-            var nextJson = JSON.stringify(nextPos);
-
+            //Send Locations to Unity Client
             io.emit('App response', nextJson);
             console.log("JSON Data Transmit: " + nextJson);
         });
+
+        // Remove the client from the list when it leaves
+        _Socket_.on('end', function () {
+            process.stdout.write(_socket.name + " Graph Module Disconnected.\n");
+        });
+    }).listen(6120);
+    console.log("Graph Socket App on port 6120");
+    //-----------------------------Connection Between Unity Game Engine--------------------
+    io.on('connection', function (socket) {
+        console.log('Unity Game Engine Connected');
+
+        //Android starts Game(First Connection).
+        io.emit('App start', 'Initialize Korean Chess Game');
+
+        //Android send request & server send response
+        socket.on('App request', function (pos) {
+            console.log('==========================Data From Unity==================================================');
+            console.log(pos + " | " + _EngineCount++);
+
+            //Json Object parsing
+            var temps = JSON.parse(pos);
+            _Socket_.write(temps.Host.toString() + '|' + temps.Board.toString());
+        });
+
+        //User Disconnected
         socket.on('App disconnect', function () {
             socket.disconnect();
-            console.log('Disconnect from user');
+            console.log('Unity Game Engine Disconnected');
+            _Socket_.write("");
         });
     });
 };
-//http://amritb.github.io/socketio-client-tool/#
