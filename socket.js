@@ -16,7 +16,8 @@ module.exports = function (io, net, exec) {
         _socket.name = _socket.remoteAddress + ":" + _socket.remotePort
 
         // Send a nice welcome message and announce
-        //_Socket_.write("Welcome " + _socket.name + "\n", _socket);
+        //_Socket_.write("Welcome " + _socket.name + "\n", _socket); --> Error
+        console.log('==========================Server Output==================================================');
         process.stdout.write(_socket.name + " Graph Module Connected\n", _socket)
 
         // Handle incoming messages from clients.
@@ -40,6 +41,7 @@ module.exports = function (io, net, exec) {
     console.log("Graph Socket App on port 6120");
     //-----------------------------Connection Between Unity Game Engine--------------------
     io.on('connection', function (socket) {
+        console.log('==========================Server Output==================================================');
         console.log('Unity Game Engine Connected');
 
         //Android starts Game(First Connection).

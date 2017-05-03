@@ -38,9 +38,12 @@ const io = new Socket(server);
 var net = require('net');
 socketEvents(io, net);
 
-var spawn = require('child_process').spawn,
-    GraphSocket;
+var spawn = require('child_process').spawn;
 GraphSocket = spawn('./_GraphModule');
+GraphSocket.stdout.on('data', function (log) {
+    console.log('==========================Module Output==================================================');
+    console.log("Module > " + log);
+});
 
 //=====================================================================================
 

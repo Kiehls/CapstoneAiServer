@@ -32,7 +32,6 @@ void setSocket(char *argv1, char *argv2) {
   int bytesread;
   int fd_max; //maximum file descriptor number
   int _socket; //waiting socket
-  int _flag = 4;
 
   fd_set master; //master file descriptor
   fd_set temps; //temp file destriptor
@@ -76,21 +75,20 @@ void setSocket(char *argv1, char *argv2) {
 
   //ADD THE LISTENR TO THE READS SET
   FD_SET(_socket, &master); // =set 1 index 3
-  //FD_SET(_flag, &master);
 
   //KEEP TRACK OF THE BIGGEST FILE DESCRIPTOR
   fd_max = _socket;
-  fd_max = _flag;
 
   memset((void*)sendMSG, 0, sizeof(sendMSG));
   memset((void*)receiveMSG, 0, sizeof(receiveMSG));
 
-  //Delete
-  sprintf(sendMSG, "FUCK");
-  int count = 0;
+  int count = 1;
+
+  std::cout << "Graph Module Generated" << std::endl << std::endl;
 
   while (true) {
-    std::cout << "WAITING ";
+    std::cout << "WAITING FOR RECEIVING DATA" << std::endl;
+    sprintf(sendMSG, "Data From Graph Module");
 
     temps = master;
     int selector;
@@ -99,33 +97,23 @@ void setSocket(char *argv1, char *argv2) {
       std::cout << "Select Error" << std::endl;
       exit(1);
     }
-    std::cout << "SELECTION, Selector: " << selector << std::endl;
 
     if (FD_ISSET(_socket, &temps)) {
-      // MESSAGE FROM PEER
       if((bytesread = read(_socket, receiveMSG, sizeof (receiveMSG)))) {
         receiveMSG[bytesread] = '\0';
         std::cout << receiveMSG << std::endl;
-        std::cout << "Data Received Count: " << count++ << std::endl;
+        std::cout << "Data Received Number: " << count++ << std::endl;
 
         write(_socket, sendMSG, strlen(sendMSG));
 
-        //memset((void*)sendMSG, NULL, sizeof(sendMSG));
+        memset((void*)sendMSG, NULL, sizeof(sendMSG));
         memset((void*)receiveMSG, NULL, sizeof(receiveMSG));
       }
       if(bytesread == -1) {
         std::cout << "Server Disconnected" << std::endl;
+        close(_socket);
         exit(1);
       }
     }
-    else if(FD_ISSET(_flag, &temps)) {
-      std::cout << "_FLAG" << std::endl;
-      write(_socket, sendMSG, strlen(sendMSG));
-      //FD_SET(_socket, &master);
-      //FD_CLR(_flag, &master);
-    }
   }
-}
-char** returnBoard(char* parsedData) {
-  return NULL;
 }
