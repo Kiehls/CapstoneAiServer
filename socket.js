@@ -2,65 +2,77 @@
  * Created by Netapp on 2017-04-01.
  */
 
-//io = server , socket = client(Android)
 var _Socket_;
-var _EngineCount = 1;
-var _GraphCount = 0;
-// Start a Socket.IO Server
-module.exports = function (io, net, exec) {
+var _ClientSocket = [];
 
-    //-----------------------------Inter Connection Between Graph Module-------------------
+// io = FROM UNITY ENGINE & _Socket_ = FROM GRAPH ENGINE
+
+module.exports = function (io, net, app) {
+//-----------------------------CONNECTION BETWEEN GRAPH ENGINE---------------------------------------------------------
     net.createServer(function (_socket) {
-        _Socket_ = _socket;
-        // Identify this client
+        // IDENTIFY THIS CLIENT
         _socket.name = _socket.remoteAddress + ":" + _socket.remotePort
+        _Socket_ = _socket;
 
-        // Send a nice welcome message and announce
-        //_Socket_.write("Welcome " + _socket.name + "\n", _socket); --> Error
-        console.log('==========================Server Output==================================================');
-        process.stdout.write(_socket.name + " Graph Module Connected\n", _socket)
+        console.log('==========================SERVER OUTPUT====================================================');
+        process.stdout.write(_socket.name + " GRAPH MODULE CONNECTED\n", _Socket_)
 
-        // Handle incoming messages from clients.
+        // HANDLE INCOMING MESSAGES FROM CLIENTS.
         _Socket_.on('data', function (data) {
-            console.log('==========================Data From Graph==================================================');
-            process.stdout.write(_socket.name + "> " + data + ' | ' + _GraphCount + "\n", _socket);
-            _GraphCount++;
+            console.log('==========================DATA FROM GRAPH==================================================');
+            process.stdout.write(_Socket_.name + "> " + data + "\n", _Socket_);
 
-            var nextJson = '7879';
+            var tempsR = data.toString().split('|');
+            if(tempsR[0] == 'ORDER') {
+                var _AI_Order = tempsR[1];
+                io.emit('AI_Order', _AI_Order);
+                console.log('AI Order: ' + _AI_Order);
+            }
+            else {
+                var nextJson = '49 59';
 
-            //Send Locations to Unity Client
-            io.emit('App response', nextJson);
-            console.log("JSON Data Transmit: " + nextJson);
+                // SEND LOCATIONS TO UNITY CLIENT
+                io.emit('Response', nextJson);
+                console.log("JSON DATA TRANSMIT: " + nextJson);
+            }
         });
 
-        // Remove the client from the list when it leaves
+        // REMOVE THE CLIENT FROM THE LIST WHEN IT LEAVES
         _Socket_.on('end', function () {
-            process.stdout.write(_socket.name + " Graph Module Disconnected.\n");
+            process.stdout.write(_Socket_.name + " Graph Module Disconnected.\n");
         });
     }).listen(6120);
     console.log("Graph Socket App on port 6120");
-    //-----------------------------Connection Between Unity Game Engine--------------------
+//-----------------------------CONNECTION BETWEEN UNITY ENGINE----------------------------------------------------------
     io.on('connection', function (socket) {
-        console.log('==========================Server Output==================================================');
+        console.log('==========================SERVER OUTPUT==================================================');
         console.log('Unity Game Engine Connected');
 
-        //Android starts Game(First Connection).
-        io.emit('App start', 'Initialize Korean Chess Game');
+        io.emit('Initialize', "START");
 
-        //Android send request & server send response
-        socket.on('App request', function (pos) {
-            console.log('==========================Data From Unity==================================================');
-            console.log(pos + " | " + _EngineCount++);
-
-            //Json Object parsing
-            var temps = JSON.parse(pos);
-            _Socket_.write(temps.Host.toString() + '|' + temps.Board.toString());
+        socket.on('Order', function (_order) {
+            console.log('==========================SERVER OUTPUT==================================================');
+            console.log('User Unit Order: ' + _order);
+            //Need to define Protocol===================================================================================
+            //_Socket_.write(_order);
+            var _orderMSG = 'order|' + _order;
+            _Socket_.write(_orderMSG);
         });
 
-        //User Disconnected
-        socket.on('App disconnect', function () {
+        // ANDROID SEND REQUEST & SERVER SEND RESPONSE
+        socket.on('Request', function (pos) {
+            console.log('==========================DATA FROM UNITY==================================================');
+            console.log(pos);
+
+            // JSON OBJECT PARSING
+            var _sendMSG = JSON.parse(pos);
+            _Socket_.write(_sendMSG.Host.toString() + '|' + _sendMSG.Board.toString());
+        });
+
+        // USER DISCONNECTED
+        socket.on('Disconnect', function () {
             socket.disconnect();
-            console.log('Unity Game Engine Disconnected');
+            console.log('Unity Engine Disconnected');
             _Socket_.write("");
         });
     });

@@ -36,15 +36,15 @@ const server = app.listen(6110, function () {
 
 const io = new Socket(server);
 var net = require('net');
-socketEvents(io, net);
+socketEvents(io, net, app);
 
 var spawn = require('child_process').spawn;
 GraphSocket = spawn('./_GraphModule');
 GraphSocket.stdout.on('data', function (log) {
-    console.log('==========================Module Output==================================================');
-    console.log("Module > " + log);
+    console.log('==========================MODULE OUTPUT====================================================');
+    console.log("MODULE > " + log);
+    console.log('===========================================================================================');
 });
-
 //=====================================================================================
 
 // catch 404 and forward to error handler
