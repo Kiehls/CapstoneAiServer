@@ -23,17 +23,18 @@ module.exports = function (io, net, app) {
             process.stdout.write(_Socket_.name + "> " + data + "\n", _Socket_);
 
             var tempsR = data.toString().split('|');
+
+            //CHECK IF RECEIVED DATA IS ORDER OR BOARD
             if(tempsR[0] == 'ORDER') {
                 var _AI_Order = tempsR[1];
                 io.emit('AI_Order', _AI_Order);
                 console.log('AI Order: ' + _AI_Order);
             }
             else {
-                var nextJson = '49 59';
-
                 // SEND LOCATIONS TO UNITY CLIENT
-                io.emit('Response', nextJson);
-                console.log("JSON DATA TRANSMIT: " + nextJson);
+                var nextPos = tempsR[1];
+                io.emit('Response', nextPos);
+                console.log("JSON DATA TRANSMIT: " + nextPos);
             }
         });
 
@@ -45,16 +46,14 @@ module.exports = function (io, net, app) {
     console.log("Graph Socket App on port 6120");
 //-----------------------------CONNECTION BETWEEN UNITY ENGINE----------------------------------------------------------
     io.on('connection', function (socket) {
-        console.log('==========================SERVER OUTPUT==================================================');
+        console.log('==========================SERVER OUTPUT====================================================');
         console.log('Unity Game Engine Connected');
 
         io.emit('Initialize', "START");
 
         socket.on('Order', function (_order) {
-            console.log('==========================SERVER OUTPUT==================================================');
+            console.log('==========================SERVER OUTPUT====================================================');
             console.log('User Unit Order: ' + _order);
-            //Need to define Protocol===================================================================================
-            //_Socket_.write(_order);
             var _orderMSG = 'order|' + _order;
             _Socket_.write(_orderMSG);
         });

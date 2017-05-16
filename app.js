@@ -38,13 +38,16 @@ const io = new Socket(server);
 var net = require('net');
 socketEvents(io, net, app);
 
-var spawn = require('child_process').spawn;
-GraphSocket = spawn('./_GraphModule');
-GraphSocket.stdout.on('data', function (log) {
-    console.log('==========================MODULE OUTPUT====================================================');
-    console.log("MODULE > " + log);
-    console.log('===========================================================================================');
-});
+var exec = require('child_process').exec;
+exec('ulimit -s 1073741824');
+
+// var spawn = require('child_process').spawn;
+// GraphSocket = spawn('./_PreGraphModule');
+// GraphSocket.stdout.on('data', function (log) {
+//     console.log('==========================MODULE OUTPUT====================================================');
+//     console.log("MODULE > " + log);
+//     console.log('===========================================================================================');
+// });
 //=====================================================================================
 
 // catch 404 and forward to error handler
