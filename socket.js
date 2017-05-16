@@ -3,11 +3,10 @@
  */
 
 var _Socket_;
-var _ClientSocket = [];
 
 // io = FROM UNITY ENGINE & _Socket_ = FROM GRAPH ENGINE
 
-module.exports = function (io, net, app) {
+module.exports = function (io, net) {
 //-----------------------------CONNECTION BETWEEN GRAPH ENGINE---------------------------------------------------------
     net.createServer(function (_socket) {
         // IDENTIFY THIS CLIENT
@@ -25,7 +24,7 @@ module.exports = function (io, net, app) {
             var tempsR = data.toString().split('|');
 
             //CHECK IF RECEIVED DATA IS ORDER OR BOARD
-            if(tempsR[0] == 'ORDER') {
+            if (tempsR[0] == 'ORDER') {
                 var _AI_Order = tempsR[1];
                 io.emit('AI_Order', _AI_Order);
                 console.log('AI Order: ' + _AI_Order);
@@ -54,6 +53,8 @@ module.exports = function (io, net, app) {
         socket.on('Order', function (_order) {
             console.log('==========================SERVER OUTPUT====================================================');
             console.log('User Unit Order: ' + _order);
+            //Need to define Protocol===================================================================================
+            //_Socket_.write(_order);
             var _orderMSG = 'order|' + _order;
             _Socket_.write(_orderMSG);
         });

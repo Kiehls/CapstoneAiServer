@@ -36,18 +36,18 @@ const server = app.listen(6110, function () {
 
 const io = new Socket(server);
 var net = require('net');
-socketEvents(io, net, app);
 
 var exec = require('child_process').exec;
 exec('ulimit -s 1073741824');
 
-// var spawn = require('child_process').spawn;
-// GraphSocket = spawn('./_PreGraphModule');
-// GraphSocket.stdout.on('data', function (log) {
-//     console.log('==========================MODULE OUTPUT====================================================');
-//     console.log("MODULE > " + log);
-//     console.log('===========================================================================================');
-// });
+var spawn = require('child_process').spawn;
+GraphSocket = spawn('./_PreGraphModule', ['-Wl,--stack,1073741824,--heap,1073741824 -j 4']);
+GraphSocket.stdout.on('data', function (log) {
+    console.log('==========================MODULE OUTPUT====================================================');
+    console.log("MODULE > " + log);
+    console.log('===========================================================================================');
+});
+socketEvents(io, net);
 //=====================================================================================
 
 // catch 404 and forward to error handler
