@@ -19,7 +19,7 @@ module.exports = function (io, net) {
         // HANDLE INCOMING MESSAGES FROM CLIENTS.
         _Socket_.on('data', function (data) {
             console.log('==========================DATA FROM GRAPH==================================================');
-            process.stdout.write(_Socket_.name + "> " + data + "\n", _Socket_);
+            //process.stdout.write(_Socket_.name + "> " + data + "\n", _Socket_);
 
             var tempsR = data.toString().split('|');
 
@@ -27,7 +27,7 @@ module.exports = function (io, net) {
             if (tempsR[0] == 'ORDER') {
                 var _AI_Order = tempsR[1];
                 io.emit('AI_Order', _AI_Order);
-                console.log('AI Order: ' + _AI_Order);
+                console.log('AI Unit Order: ' + _AI_Order);
             }
             else {
                 // SEND LOCATIONS TO UNITY CLIENT
@@ -73,7 +73,6 @@ module.exports = function (io, net) {
         socket.on('Disconnect', function () {
             socket.disconnect();
             console.log('Unity Engine Disconnected');
-            _Socket_.write("");
         });
     });
 };
